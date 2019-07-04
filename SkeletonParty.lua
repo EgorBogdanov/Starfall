@@ -4,15 +4,21 @@
 
 if CLIENT then
     local url = 'https://dl.dropboxusercontent.com/s/pje3wlwhyc0r2a0/Hampton%2Bthe%2BHampster%2BHamster%2BDance%2BSong_muzlishko.ru.mp3?dl=0'
-    
+    local fft = {}
     bass.loadURL( url, '3d noblock', function(Sound)
         Sound:play()
         hook.add("think","",function()
             Sound:setPos(owner():getPos())
             fft=Sound:getFFT(6)
         end)
+        hook.add("drawhud",'',function()
+            local Color = Color((timer.curtime()*10)%360, (fft[6] or 0)*40, (fft[6] or 0)*40):hsvToRGB()
+            Color:setA( 50)
+            render.setColor(Color)
+            render.drawRect(0,0,2000,2000)
+        end)
     end)
-
+    
 else
     local holo      = {}
     local pos       = chip():getPos()
