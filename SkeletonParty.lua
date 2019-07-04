@@ -18,7 +18,6 @@ if CLIENT then
             render.drawRect(0,0,2000,2000)
         end)
     end)
-    
 else
     local holo      = {}
     local pos       = chip():getPos()
