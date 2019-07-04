@@ -27,4 +27,4 @@ hook.add('tick','',function()
         holo[i]:setPos(movePos)
     end
     j=(j+0.02)%360
-
+end)
