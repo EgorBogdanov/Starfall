@@ -38,7 +38,7 @@ hook.add("render","",function()
     
     while i <= #lines do
         if lines[i].y - lines[i].length < 0 then
-            part = 20 * lines[i].y / lines[i].length
+            part = 5 * lines[i].length / lines[i].y
             render.setColor(Color(0,part*2,0))
             render.drawRect(lines[i].x-2, 0,10,10)
             render.setColor(Color(0,part*10,0))
