@@ -4,12 +4,12 @@
 
 local fft={}
 
-bass.loadURL( "http://cdndl.zaycev.net/265742/7043550/imagine_dragons_-_whatever_it_takes_%28zaycev.net%29.mp3", "3d noblock", function(Sound)
+
+bass.loadURL( "https://play.sas-media.ru/play_256", "3d noblock", function(Sound)
     Sound:play()
-    Sound:setLooping(true)
     hook.add("think","",function()
         Sound:setPos(chip():getPos())
-        fft=Sound:getFFT(5)
+        fft=Sound:getFFT(6)
     end)
 end)
                 
@@ -32,4 +32,6 @@ hook.add("render","",function()
         render.draw3DBox(Vector(0+i*10,512,250),Angle(),Vector(),Vector(10,-50-(fft[i+1] or 0)*350,10))
     end
 end)
+
+
 
