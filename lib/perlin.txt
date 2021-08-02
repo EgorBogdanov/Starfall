@@ -1,0 +1,100 @@
+local perlin = {}
+
+local PERLIN_ = {}
+
+local PID = 0
+
+local PERLIN_YWRAPB = 4
+local PERLIN_YWRAP  = bit.lshift(1,PERLIN_YWRAPB) 
+local PERLIN_ZWRAPB = 8
+local PERLIN_ZWRAP  = bit.lshift(1,PERLIN_ZWRAPB)
+local PERLIN_SIZE   = 4095
+    
+local PERLIN_octaves     = 4 
+local PERLIN_amp_falloff = 0.5 
+
+local function quotaCheck (n)
+    return math.max(quotaAverage(), quotaUsed()) < quotaMax()*n
+end
+
+local function scaled_cosine(I)
+    return 0.5 * (1.0 - math.cos(I * math.pi))
+end
+
+function perlin.noise(X, Y, Z)
+    
+    local X = tonumber(X) and tonumber(X) or 0
+    local Y = tonumber(Y) and tonumber(Y) or 0
+    local Z = tonumber(Z) and tonumber(Z) or 0
+    
+    local Xi = math.floor(X)
+    local Yi = math.floor(Y)
+    local Zi = math.floor(Z)
+
+    local Xf = X - Xi
+    local Yf = Y - Yi
+    local Zf = Z - Zi
+    
+    local Ampl = 0.5
+    
+    local RXf, RYf, Of, R, N1, N2, N3 = 0, 0, 0, 0, 0, 0, 0
+    
+    for I = 1, PERLIN_octaves do
+        Of = Xi + (bit.lshift(Yi,PERLIN_YWRAPB) + (bit.lshift(Zi,PERLIN_ZWRAPB)))
+        
+        RXf = scaled_cosine(Xf)
+        RYf = scaled_cosine(Yf)
+        
+        N1 = PERLIN_[bit.band(Of,PERLIN_SIZE)]
+        N1 = N1 + (RXf * (PERLIN_[bit.band((Of + 1), PERLIN_SIZE)] - N1))
+        N2 = PERLIN_[bit.band((Of + PERLIN_YWRAP), PERLIN_SIZE)]
+        N2 = N2 + (RXf * (PERLIN_[bit.band((Of + PERLIN_YWRAP + 1), PERLIN_SIZE)] - N2))
+        N1 = N1 + (RYf * (N2 - N1))
+        
+        Of = Of + PERLIN_ZWRAP
+        N2 = PERLIN_[bit.band(Of, PERLIN_SIZE)]
+        N2 = N2 + (RXf * (PERLIN_[bit.band((Of + 1), PERLIN_SIZE)] - N2))
+        N3 = PERLIN_[bit.band((Of + PERLIN_YWRAP), PERLIN_SIZE)]
+        N3 = N3 + (RXf * (PERLIN_[bit.band((Of + PERLIN_YWRAP + 1), PERLIN_SIZE)] - N3))
+        N2 = N2 + (RYf * (N3 - N2))
+        
+        N1 = N1 + scaled_cosine(Zf) * (N2 - N1)
+        
+        R = R + N1 * Ampl
+        Ampl = Ampl * PERLIN_amp_falloff
+        
+        Xi = bit.lshift(Xi, 1)
+        Xf = Xf * 2
+        Yi = bit.lshift(Yi, 1)
+        Yf = Yf * 2
+        Zi = bit.lshift(Zi, 1)
+        Zf = Zf * 2
+        
+        if Xf >= 1.0 then
+            Xi = Xi + 1
+            Xf = Xf - 1
+        end
+        
+        if Yf >= 1.0 then
+            Yi = Yi + 1
+            Yf = Yf - 1
+        end
+        
+        if Zf >= 1.0 then
+            Zi = Zi + 1
+            Zf = Zf - 1
+        end
+    end
+    
+    return R
+end
+
+function perlin.init(callback)
+    while PID < PERLIN_SIZE+1 do
+        PERLIN_[PID] = math.random()
+        PID = PID + 1
+    end 
+    callback()
+end
+
+return perlin 
